@@ -43,7 +43,9 @@ class BinarySearchTree {
   }
 
   has(data) {
-    if (!this.node) throw new Error;
+    if (!this.node) {
+      return false;
+    };
     
     return searchData(this.node);
 
@@ -72,7 +74,7 @@ class BinarySearchTree {
 
   find(data) {
     if (!this.node) {
-      return null;
+      return false;
     }
     
     return findNode (this.node);
@@ -102,82 +104,46 @@ class BinarySearchTree {
     if (!this.node) {
       return null;
     }
-
-    let currentNode;
-    let previousNode;
-    let isLeft;
     
-    if (data === this.node.data) {
-      delete this.node;
-    } else {
-      if ( data < this.node.data) {
-        if (this.node.left === null) {
-          return null;
-        } else {
-          previousNode = this.node;
-          currentNode = this.node.left;
-          isLeft = true;
-        }
-      }
-      if (data > this.node.data) {
-        if (this.node.right === null) {
-          return null;
-        } else {
-          previousNode = this.node;
-          currentNode = this.node.right;
-          isLeft = false;
-        }
-      }
-      
-      searchAndRemoveNode(currentNode);
-    }
+    this.node = searchAndRemoveNode(this.node);
 
     function searchAndRemoveNode (node) {
       if (data === node.data) {
-        if (isLeft) {
-          if (node.left !== null && node.right === null) {
-            node.data = node.left.data;
-            previousNode.left = node.left;
-          }
-          if (node.left === null && node.right !== null) {
-            node.data = node.right.data;
-            previousNode.left = node.right;
-          }
-          if (node.left !== null && node.right !== null) {
-            // deleted node has both child nodes -> max left / min right
-            // previousNode.left = node.left;
-            // node.data = node.left.data;
-          }
-        } else {
-          if (node.left !== null && node.right === null) {
-            node.data = node.left.data;
-            previousNode.right = node.left;
-          }
-          if (node.left === null && node.right !== null) {
-            node.data = node.right.data;
-            previousNode.right = node.right;
-          }
+        if (node.left === null && node.right === null) {
+          return null;
         }
+
+        if (node.left === null) {
+          node = node.right;
+          return node;
+        }
+
+        if (node.right === null) {
+          node = node.left;
+          return node;
+        }
+
+        let maxFromLeft = node.left;
+        while (maxFromLeft.right) {
+          maxFromLeft = maxFromLeft.right;
+        }
+        node.data = maxFromLeft.data;
+        
+        data = maxFromLeft.data;
+        node.left = searchAndRemoveNode(node.left);
+        
+        return node;
       } else {
         if (data < node.data) {
-          if (node.left === null) {
-            return null;
-          } else {
-            previousNode = node;
-            node = node.left
-            isLeft = true;
-          }
+          node.left = searchAndRemoveNode(node.left);
+          
+          return node;
         } 
         if (data > node.data) {
-          if (node.right === null) {
-            return null;
-          } else {
-            previousNode = node;
-            node = node.right
-            isLeft = false;
-          }
+          node.right = searchAndRemoveNode(node.right);
+
+          return node;
         }
-        searchAndRemoveNode(node);
       }
     }   
   }
